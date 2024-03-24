@@ -1,11 +1,14 @@
 const express = require("express");
+const { db } = require("../../database/data");
 // const workoutController = require("../../controllers/workoutController");
 // const recordController = require("../../controllers/recordController");
 
 const router = express.Router();
 
 router.get("/currencies", (req, res) => {
-  res.send(`Получение списка валют`);
+  db.all("SELECT * from Currencies", (err, row) => {
+    res.send(row);
+  });
 });
 
 router.get("/currency/:name", (req, res) => {
@@ -19,7 +22,9 @@ router.post("/currencies", (req, res) => {
 //
 
 router.get("/exchangeRates", (req, res) => {
-  res.send("Получение списка всех обменных курсов");
+  db.all("SELECT * from ExchangeRates", (err, row) => {
+    res.send(row);
+  });
 });
 
 router.get("/exchangeRate/:name", (req, res) => {
