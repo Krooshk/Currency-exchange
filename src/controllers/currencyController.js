@@ -1,25 +1,29 @@
 const { db } = require("../database/data");
 const currencyService = require("../services/currencyService");
 
-const getAllCurrencies = (req, res) => {
-  currencyService.getAllCurrencies(res);
+const getAllCurrencies = async (req, res) => {
+  const allCurrencies = await currencyService.getAllCurrencies();
+  res.send(allCurrencies);
 };
 
-const getOneCurrency = (req, res) => {
+const getOneCurrency = async (req, res) => {
   const {
     params: { name },
   } = req;
-  currencyService.getOneCurrency(name, res);
+
+  const currency = await currencyService.getOneCurrency(name);
+  res.send(currency);
 };
 
-const addCurrency = (req, res) => {
-  res.send("Create a new Currency ");
+const addCurrency = async (req, res) => {
+  const currencyName = await currencyService.addCurrency(req);
+  const currency = await currencyService.getOneCurrency(currencyName);
+  res.send(currency);
 };
 
-const getAllExchangeRates = (req, res) => {
-  db.all("SELECT * from ExchangeRates", (err, row) => {
-    res.send(row);
-  });
+const getAllExchangeRates = async (req, res) => {
+  const allExchangeRates = await currencyService.getAllExchangeRates();
+  res.send(allExchangeRates);
 };
 
 const getOneExchangeRate = (req, res) => {

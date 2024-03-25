@@ -45,13 +45,13 @@ async function startDatabase() {
       "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES ('3', '4', '0.924113')"
     );
 
-    db.all("SELECT * from ExchangeRates", (error, row) => {
-      if (error) {
-        console.error(error.message);
-        return;
-      }
-      console.log(row);
-    });
+    // db.all("SELECT * from ExchangeRates", (error, row) => {
+    //   if (error) {
+    //     console.error(error.message);
+    //     return;
+    //   }
+    //   console.log(row);
+    // });
 
     db.all("SELECT * from Currencies", (error, row) => {
       if (error) {
