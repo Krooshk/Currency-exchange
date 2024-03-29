@@ -26,19 +26,27 @@ const getAllExchangeRates = async (req, res) => {
   res.send(allExchangeRates);
 };
 
-const getOneExchangeRate = (req, res) => {
+const getOneExchangeRate = async (req, res) => {
   const {
     params: { name },
   } = req;
-  currencyService.getOneExchangeRate(name, res);
+
+  const exchangeRate = await currencyService.getOneExchangeRate(name);
+  res.send(exchangeRate);
 };
 
-const addExchangeRate = (req, res) => {
-  res.send("Create a new ExchangeRate ");
+const addExchangeRate = async (req, res) => {
+  const exchangeRate = await currencyService.addExchangeRate(req);
+  res.send(exchangeRate);
 };
 
-const updateExchangeRate = (req, res) => {
-  res.send("update Exchange Rate");
+const updateExchangeRate = async (req, res) => {
+  const {
+    params: { name },
+  } = req;
+
+  const exchangeRate = await currencyService.updateExchangeRate(req, name);
+  res.send(exchangeRate);
 };
 
 const calculationСurrency = (req, res) => {

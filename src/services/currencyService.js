@@ -49,27 +49,62 @@ const getAllExchangeRates = () => {
   });
 };
 
-const getOneExchangeRate = (name, res) => {
+const getOneExchangeRate = (name) => {
   const [base, target] = [name.slice(0, 3), name.slice(3)];
-  console.log(base);
-  db.get(
-    `SELECT * from ExchangeRates  
-    WHERE BaseCurrencyId = (SELECT id from Currencies WHERE Code = '${base}')
-    AND TargetCurrencyId = (SELECT id from Currencies WHERE Code = '${target}')
-    `,
-    (err, row) => {
-      console.log(row);
-      res.send(row);
-    }
-  );
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT * from ExchangeRates  
+       WHERE BaseCurrencyId = (SELECT id from Currencies WHERE Code = '${base}')
+       AND TargetCurrencyId = (SELECT id from Currencies WHERE Code = '${target}')
+       `,
+      (err, row) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(row);
+      }
+    );
+  });
 };
 
-const addExchangeRate = () => {
-  return;
+const addExchangeRate = (req) => {
+  const { baseCurrencyCode, targetCurrencyCode, rate } = req.query;
+
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES
+       ((SELECT id from Currencies where Code = '${baseCurrencyCode}'),
+        (SELECT id from Currencies where Code = '${targetCurrencyCode}'),
+         '${rate}') `,
+      (err) => {
+        if (err) {
+          reject(err);
+        }
+        resolve();
+      }
+    );
+  });
 };
 
-const updateExchangeRate = () => {
-  return;
+const updateExchangeRate = (req, name) => {
+  const { rate } = req.query;
+  const [base, target] = [name.slice(0, 3), name.slice(3)];
+  return new Promise((resolve, reject) => {
+    db.get(
+      `UPDATE ExchangeRates SET (BaseCurrencyId, TargetCurrencyId, Rate) =
+       ((SELECT id from Currencies where Code = '${base}'),
+       (SELECT id from Currencies where Code = '${target}'),
+       '${rate}' )
+       WHERE BaseCurrencyId = (SELECT id from Currencies WHERE Code = '${base}')
+       AND TargetCurrencyId = (SELECT id from Currencies WHERE Code = '${target}')`,
+      (err, row) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(row);
+      }
+    );
+  });
 };
 
 const calculationСurrency = () => {
