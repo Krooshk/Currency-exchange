@@ -11,31 +11,41 @@ const getAllCurrencies = () => {
   });
 };
 
-const getOneCurrency = (name) => {
+const getOneCurrency = (code) => {
   return new Promise((resolve, reject) => {
-    db.get(`SELECT * from Currencies WHERE Code = '${name}'`, (err, row) => {
+    db.get(`SELECT * from Currencies WHERE Code = '${code}'`, (err, row) => {
       if (err) {
         reject(err);
       }
       if (!row) {
-        reject(err);
+        resolve(null);
       }
       resolve(row);
     });
   });
 };
 
-const addCurrency = (req) => {
-  const { name, code, sign } = req.query;
+const addCurrency = (name, code, sign) => {
+  return new Promise(async (resolve, reject) => {
+    const isExict = await getOneCurrency(code);
 
-  return new Promise((resolve, reject) => {
+    if (isExict) {
+      resolve("Exict");
+    }
+
     db.run(
       `INSERT INTO Currencies (Code, FullName, Sign) VALUES ('${code}', '${name}', '${sign}')`,
-      (err, row) => {
+      function (err, row) {
         if (err) {
           reject(err);
         }
-        resolve(name);
+
+        resolve({
+          id: this.lastID,
+          name,
+          code,
+          sign,
+        });
       }
     );
   });
@@ -46,6 +56,9 @@ const getAllExchangeRates = () => {
     db.all("SELECT * from ExchangeRates", (err, row) => {
       if (err) {
         reject(err);
+      }
+      if (!row) {
+        resolve(null);
       }
       resolve(row);
     });
@@ -70,20 +83,37 @@ const getOneExchangeRate = (name) => {
   });
 };
 
-const addExchangeRate = (req) => {
-  const { baseCurrencyCode, targetCurrencyCode, rate } = req.query;
+const addExchangeRate = (baseCurrencyCode, targetCurrencyCode, rate) => {
+  return new Promise(async (resolve, reject) => {
+    const isExict = await getOneExchangeRate(
+      baseCurrencyCode + targetCurrencyCode
+    );
 
-  return new Promise((resolve, reject) => {
+    if (isExict) {
+      reject(409);
+      return;
+    }
+
+    const base = await getOneCurrency(baseCurrencyCode);
+    const target = await getOneCurrency(targetCurrencyCode);
+
+    if (!(base && target)) {
+      reject(404);
+      return;
+    }
+
     db.run(
-      `INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES
-       ((SELECT id from Currencies where Code = '${baseCurrencyCode}'),
-        (SELECT id from Currencies where Code = '${targetCurrencyCode}'),
-         '${rate}') `,
-      (err) => {
+      `INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES (${base.id}, ${target.id}, '${rate}') `,
+      function (err) {
         if (err) {
-          reject(err);
+          reject(500);
         }
-        resolve();
+        resolve({
+          id: this.lastID,
+          baseCurrency: base,
+          targetCurrency: target,
+          rate,
+        });
       }
     );
   });

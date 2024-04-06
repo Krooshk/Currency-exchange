@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/currencies", currencyController.getAllCurrencies);
 
-router.get("/currency/:name", currencyController.getOneCurrency);
+router.get("/currency/:code?", currencyController.getOneCurrency);
 
 router.post("/currencies", currencyController.addCurrency);
 
