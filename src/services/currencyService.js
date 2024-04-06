@@ -17,6 +17,9 @@ const getOneCurrency = (name) => {
       if (err) {
         reject(err);
       }
+      if (!row) {
+        reject(err);
+      }
       resolve(row);
     });
   });
@@ -107,8 +110,75 @@ const updateExchangeRate = (req, name) => {
   });
 };
 
-const calculationСurrency = () => {
-  return;
+const calculationСurrency = async (req) => {
+  const { amount, from, to } = req.query;
+  let baseCurrency;
+  let targetCurrency;
+
+  try {
+    baseCurrency = await getOneCurrency(from);
+    targetCurrency = await getOneCurrency(to);
+  } catch (error) {}
+
+  let result = null;
+
+  try {
+    const straightExchangeRate = await getOneExchangeRate(
+      baseCurrency["Code"] + targetCurrency["Code"]
+    );
+
+    if (straightExchangeRate) {
+      result = {
+        baseCurrency: baseCurrency,
+        targetCurrency: targetCurrency,
+        amount: amount,
+        rate: straightExchangeRate["Rate"],
+        convertedAmount: Number(amount) * Number(straightExchangeRate["Rate"]),
+      };
+    }
+  } catch (error) {}
+
+  try {
+    const reverseExchangeRate = await getOneExchangeRate(
+      targetCurrency["Code"] + baseCurrency["Code"]
+    );
+
+    if (reverseExchangeRate) {
+      result = {
+        baseCurrency: baseCurrency,
+        targetCurrency: targetCurrency,
+        amount: amount,
+        rate: 1 / Number(reverseExchangeRate["Rate"]),
+        convertedAmount:
+          Number(amount) * (1 / Number(reverseExchangeRate["Rate"])),
+      };
+    }
+  } catch (error) {}
+
+  try {
+    const USDEtoBase = await getOneExchangeRate("USD" + baseCurrency["Code"]);
+    const USDEtoTarget = await getOneExchangeRate(
+      "USD" + targetCurrency["Code"]
+    );
+
+    const rate = Number(USDEtoTarget["Rate"]) / Number(USDEtoBase["Rate"]);
+
+    if (USDEtoBase && USDEtoTarget) {
+      result = {
+        baseCurrency: baseCurrency,
+        targetCurrency: targetCurrency,
+        amount: amount,
+        rate,
+        convertedAmount: Number(amount) * rate,
+      };
+    }
+  } catch (error) {}
+
+  return (
+    result || {
+      message: "Валюта не найдена",
+    }
+  );
 };
 
 module.exports = {

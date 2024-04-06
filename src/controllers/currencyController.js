@@ -1,4 +1,3 @@
-const { db } = require("../database/data");
 const currencyService = require("../services/currencyService");
 
 const getAllCurrencies = async (req, res) => {
@@ -49,11 +48,9 @@ const updateExchangeRate = async (req, res) => {
   res.send(exchangeRate);
 };
 
-const calculationСurrency = (req, res) => {
-  const { amount, from, to } = req.query;
-  res.send(
-    `${amount} ${from} ${to} Расчёт перевода определённого количества средств из одной валюты в другую`
-  );
+const calculationСurrency = async (req, res) => {
+  const result = await currencyService.calculationСurrency(req);
+  res.send(result);
 };
 
 module.exports = {

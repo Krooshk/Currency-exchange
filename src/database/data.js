@@ -53,13 +53,13 @@ async function startDatabase() {
     //   console.log(row);
     // });
 
-    db.all("SELECT * from Currencies", (error, row) => {
-      if (error) {
-        console.error(error.message);
-        return;
-      }
-      console.log(row);
-    });
+    // db.all("SELECT * from Currencies", (error, row) => {
+    //   if (error) {
+    //     console.error(error.message);
+    //     return;
+    //   }
+    //   //   console.log(row);
+    // });
   });
 }
 
