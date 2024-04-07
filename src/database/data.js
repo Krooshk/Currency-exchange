@@ -1,7 +1,5 @@
 const sqlite3 = require("sqlite3");
-const db = new sqlite3.Database(
-  "D:/ROADMAP_Zhukov/Github/Currency-exchange/src/database/my_database.sqlite"
-);
+const db = new sqlite3.Database("./my_database.sqlite");
 
 async function startDatabase() {
   db.serialize(() => {
