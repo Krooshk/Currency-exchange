@@ -32,7 +32,7 @@ const getOneCurrency = async (req, res) => {
 };
 
 const addCurrency = async (req, res) => {
-  const { name, code, sign } = req.query;
+  const { name, code, sign } = req.body;
 
   if (!(name && code && sign)) {
     res.status(400).send("Отсутствует нужное поле формы");
@@ -83,7 +83,7 @@ const getOneExchangeRate = async (req, res) => {
 };
 
 const addExchangeRate = async (req, res) => {
-  const { baseCurrencyCode, targetCurrencyCode, rate } = req.query;
+  const { baseCurrencyCode, targetCurrencyCode, rate } = req.body;
 
   if (!(baseCurrencyCode && targetCurrencyCode && rate)) {
     res.status(400).send("Отсутствует нужное поле формы");
