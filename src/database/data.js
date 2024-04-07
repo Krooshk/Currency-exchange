@@ -12,7 +12,7 @@ async function startDatabase() {
     );
 
     db.run(
-      "CREATE TABLE IF NOT EXISTS ExchangeRates (id INTEGER PRIMARY KEY, BaseCurrencyId int,  TargetCurrencyId int, rate Decimal(6))"
+      "CREATE TABLE IF NOT EXISTS ExchangeRates (id INTEGER PRIMARY KEY, baseCurrency int,  targetCurrency int, rate Decimal(6))"
     );
 
     db.run(
@@ -32,15 +32,15 @@ async function startDatabase() {
     );
 
     db.run(
-      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, rate) VALUES ('3', '1', '1.53')"
+      "INSERT INTO ExchangeRates (baseCurrency, targetCurrency, rate) VALUES ('3', '1', '1.53')"
     );
 
     db.run(
-      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, rate) VALUES ('3', '2', '92.61')"
+      "INSERT INTO ExchangeRates (baseCurrency, targetCurrency, rate) VALUES ('3', '2', '92.61')"
     );
 
     db.run(
-      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, rate) VALUES ('3', '4', '0.924113')"
+      "INSERT INTO ExchangeRates (baseCurrency, targetCurrency, rate) VALUES ('3', '4', '0.924113')"
     );
 
     // db.all("SELECT * from ExchangeRates", (error, row) => {

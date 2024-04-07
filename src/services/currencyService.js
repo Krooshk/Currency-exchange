@@ -70,8 +70,8 @@ const getOneExchangeRate = (name) => {
   return new Promise((resolve, reject) => {
     db.get(
       `SELECT * from ExchangeRates  
-       WHERE BaseCurrencyId = (SELECT id from Currencies WHERE code = '${base}')
-       AND TargetCurrencyId = (SELECT id from Currencies WHERE code = '${target}')
+       WHERE baseCurrency = (SELECT id from Currencies WHERE code = '${base}')
+       AND targetCurrency = (SELECT id from Currencies WHERE code = '${target}')
        `,
       (err, row) => {
         if (err) {
@@ -103,7 +103,7 @@ const addExchangeRate = (baseCurrencyCode, targetCurrencyCode, rate) => {
     }
 
     db.run(
-      `INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES (${base.id}, ${target.id}, '${rate}') `,
+      `INSERT INTO ExchangeRates (baseCurrency, targetCurrency, Rate) VALUES (${base.id}, ${target.id}, '${rate}') `,
       function (err) {
         if (err) {
           reject(500);
@@ -124,12 +124,12 @@ const updateExchangeRate = (req, name) => {
   const [base, target] = [name.slice(0, 3), name.slice(3)];
   return new Promise((resolve, reject) => {
     db.get(
-      `UPDATE ExchangeRates SET (BaseCurrencyId, TargetCurrencyId, Rate) =
+      `UPDATE ExchangeRates SET (baseCurrency, targetCurrency, rate) =
        ((SELECT id from Currencies where code = '${base}'),
        (SELECT id from Currencies where code = '${target}'),
        '${rate}' )
-       WHERE BaseCurrencyId = (SELECT id from Currencies WHERE code = '${base}')
-       AND TargetCurrencyId = (SELECT id from Currencies WHERE code = '${target}')`,
+       WHERE baseCurrency = (SELECT id from Currencies WHERE code = '${base}')
+       AND targetCurrency = (SELECT id from Currencies WHERE code = '${target}')`,
       (err, row) => {
         if (err) {
           reject(err);
