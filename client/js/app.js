@@ -1,6 +1,6 @@
 $(document).ready(function () {
-  //   const host = "https://currency-exchange-0mcp.onrender.com/api/v1";
-  const host = "http://localhost:3000/api/v1";
+  const host = "https://currency-exchange-0mcp.onrender.com/api/v1";
+  //   const host = "http://localhost:3000/api/v1";
 
   // Fetch the list of currencies and populate the select element
   function requestCurrencies() {
