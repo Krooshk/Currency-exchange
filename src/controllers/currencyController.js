@@ -67,18 +67,18 @@ const getOneExchangeRate = async (req, res) => {
 
   if (!name) {
     res.status(400).send("Коды валют пары отсутствуют в адресе");
+    return;
   }
 
   try {
     const exchangeRate = await currencyService.getOneExchangeRate(name);
-
-    if (!exchangeRate) {
-      res.status(404).send("Обменный курс для пары не найден");
-    }
-
     res.send(exchangeRate);
   } catch (error) {
-    res.status(500).send("Ошибка: база данных недоступна");
+    if (error === 404) {
+      res.status(404).send("Обменный курс для пары не найден");
+    } else {
+      res.status(500).send("Ошибка: база данных недоступна");
+    }
   }
 };
 

@@ -12,11 +12,11 @@ router.post("/currencies", currencyController.addCurrency);
 //
 router.get("/exchangeRates", currencyController.getAllExchangeRates);
 
-router.get("/exchangeRate/:name", currencyController.getOneExchangeRate);
+router.get("/exchangeRate/:name?", currencyController.getOneExchangeRate);
 
 router.post("/exchangeRates", currencyController.addExchangeRate);
 
-router.patch("/exchangeRate/:name", currencyController.updateExchangeRate);
+router.patch("/exchangeRate/:name?", currencyController.updateExchangeRate);
 
 //
 router.get("/exchange", currencyController.calculationСurrency);

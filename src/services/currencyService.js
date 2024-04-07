@@ -54,7 +54,11 @@ const addCurrency = (name, code, sign) => {
 const getAllExchangeRates = () => {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT er.id, c1.id as baseID, c1.code as baseCode, c1.name as baseName, c1.sign as baseSign, c2.id as targetID, c2.code as targetCode, c2.name as targetName, c2.sign as targetSign, er.rate FROM ExchangeRates er LEFT JOIN Currencies c1 ON er.baseCurrency = c1.id LEFT JOIN Currencies c2 ON er.targetCurrency = c2.id",
+      `SELECT er.id, c1.id as baseID, c1.code as baseCode, c1.name as baseName, c1.sign as baseSign, 
+       c2.id as targetID, c2.code as targetCode, c2.name as targetName, c2.sign as targetSign, er.rate 
+       FROM ExchangeRates er 
+       LEFT JOIN Currencies c1 ON er.baseCurrency = c1.id 
+       LEFT JOIN Currencies c2 ON er.targetCurrency = c2.id`,
       (err, row) => {
         if (err) {
           reject(err);
@@ -64,23 +68,7 @@ const getAllExchangeRates = () => {
         }
 
         const formattedArray = row.map((el) => {
-          const fomattedObj = {
-            id: el.id,
-            baseCurrency: {
-              id: el.baseID,
-              name: el.baseName,
-              code: el.baseCode,
-              sign: el.baseSign,
-            },
-            targetCurrency: {
-              id: el.targetID,
-              name: el.targetName,
-              code: el.targetCode,
-              sign: el.targetSign,
-            },
-            rate: el.rate,
-          };
-          return fomattedObj;
+          return transformObj.call(this, el);
         });
 
         resolve(formattedArray);
@@ -92,16 +80,29 @@ const getAllExchangeRates = () => {
 const getOneExchangeRate = (name) => {
   const [base, target] = [name.slice(0, 3), name.slice(3)];
   return new Promise((resolve, reject) => {
+    // `SELECT * from ExchangeRates
+    // WHERE baseCurrency = (SELECT id from Currencies WHERE code = '${base}')
+    // AND targetCurrency = (SELECT id from Currencies WHERE code = '${target}')
+    // `;
     db.get(
-      `SELECT * from ExchangeRates  
-       WHERE baseCurrency = (SELECT id from Currencies WHERE code = '${base}')
-       AND targetCurrency = (SELECT id from Currencies WHERE code = '${target}')
-       `,
+      `SELECT er.id, c1.id as baseID, c1.code as baseCode, c1.name as baseName, c1.sign as baseSign, 
+       c2.id as targetID, c2.code as targetCode, c2.name as targetName, c2.sign as targetSign, er.rate 
+       FROM ExchangeRates er 
+       LEFT JOIN Currencies c1 ON er.baseCurrency = c1.id 
+       LEFT JOIN Currencies c2 ON er.targetCurrency = c2.id
+       WHERE c1.code = '${base}'
+       AND c2.code = '${target}'
+	   `,
       (err, row) => {
         if (err) {
-          reject(err);
+          reject(500);
         }
-        resolve(row);
+        if (!row) {
+          reject(404);
+        } else {
+          const newObj = transformObj.call(this, row);
+          resolve(newObj);
+        }
       }
     );
   });
@@ -109,14 +110,10 @@ const getOneExchangeRate = (name) => {
 
 const addExchangeRate = (baseCurrencyCode, targetCurrencyCode, rate) => {
   return new Promise(async (resolve, reject) => {
-    const isExict = await getOneExchangeRate(
-      baseCurrencyCode + targetCurrencyCode
+    getOneExchangeRate(baseCurrencyCode + targetCurrencyCode).then(
+      () => reject(409),
+      () => {}
     );
-
-    if (isExict) {
-      reject(409);
-      return;
-    }
 
     const base = await getOneCurrency(baseCurrencyCode);
     const target = await getOneCurrency(targetCurrencyCode);
@@ -144,21 +141,21 @@ const addExchangeRate = (baseCurrencyCode, targetCurrencyCode, rate) => {
 };
 
 const updateExchangeRate = (req, name) => {
-  const { rate } = req.query;
+  const { rate } = req.body;
   const [base, target] = [name.slice(0, 3), name.slice(3)];
   return new Promise((resolve, reject) => {
-    db.get(
+    db.run(
       `UPDATE ExchangeRates SET (baseCurrency, targetCurrency, rate) =
        ((SELECT id from Currencies where code = '${base}'),
        (SELECT id from Currencies where code = '${target}'),
        '${rate}' )
        WHERE baseCurrency = (SELECT id from Currencies WHERE code = '${base}')
        AND targetCurrency = (SELECT id from Currencies WHERE code = '${target}')`,
-      (err, row) => {
+      function (err, row) {
         if (err) {
           reject(err);
         }
-        resolve(row);
+        resolve(rate);
       }
     );
   });
@@ -178,7 +175,7 @@ const calculationСurrency = async (req) => {
 
   try {
     const straightExchangeRate = await getOneExchangeRate(
-      baseCurrency["Code"] + targetCurrency["Code"]
+      baseCurrency["code"] + targetCurrency["code"]
     );
 
     if (straightExchangeRate) {
@@ -186,15 +183,17 @@ const calculationСurrency = async (req) => {
         baseCurrency: baseCurrency,
         targetCurrency: targetCurrency,
         amount: amount,
-        rate: straightExchangeRate["Rate"],
-        convertedAmount: Number(amount) * Number(straightExchangeRate["Rate"]),
+        rate: straightExchangeRate["rate"],
+        convertedAmount: Number(amount) * Number(straightExchangeRate["rate"]),
       };
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 
   try {
     const reverseExchangeRate = await getOneExchangeRate(
-      targetCurrency["Code"] + baseCurrency["Code"]
+      targetCurrency["code"] + baseCurrency["code"]
     );
 
     if (reverseExchangeRate) {
@@ -202,20 +201,20 @@ const calculationСurrency = async (req) => {
         baseCurrency: baseCurrency,
         targetCurrency: targetCurrency,
         amount: amount,
-        rate: 1 / Number(reverseExchangeRate["Rate"]),
+        rate: 1 / Number(reverseExchangeRate["rate"]),
         convertedAmount:
-          Number(amount) * (1 / Number(reverseExchangeRate["Rate"])),
+          Number(amount) * (1 / Number(reverseExchangeRate["rate"])),
       };
     }
   } catch (error) {}
 
   try {
-    const USDEtoBase = await getOneExchangeRate("USD" + baseCurrency["Code"]);
+    const USDEtoBase = await getOneExchangeRate("USD" + baseCurrency["code"]);
     const USDEtoTarget = await getOneExchangeRate(
-      "USD" + targetCurrency["Code"]
+      "USD" + targetCurrency["code"]
     );
 
-    const rate = Number(USDEtoTarget["Rate"]) / Number(USDEtoBase["Rate"]);
+    const rate = Number(USDEtoTarget["rate"]) / Number(USDEtoBase["rate"]);
 
     if (USDEtoBase && USDEtoTarget) {
       result = {
@@ -234,6 +233,27 @@ const calculationСurrency = async (req) => {
     }
   );
 };
+
+function transformObj(obj) {
+  const fomattedObj = {
+    id: obj.id,
+    baseCurrency: {
+      id: obj.baseID,
+      name: obj.baseName,
+      code: obj.baseCode,
+      sign: obj.baseSign,
+    },
+    targetCurrency: {
+      id: obj.targetID,
+      name: obj.targetName,
+      code: obj.targetCode,
+      sign: obj.targetSign,
+    },
+    rate: obj.rate,
+  };
+
+  return fomattedObj;
+}
 
 module.exports = {
   getAllCurrencies,
