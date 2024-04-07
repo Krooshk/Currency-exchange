@@ -102,6 +102,7 @@ $(document).ready(function () {
         tbody.empty();
         $.each(response, function (index, rate) {
           const row = $("<tr></tr>");
+          console.log(rate);
           const currency = rate.baseCurrency.code + rate.targetCurrency.code;
           const exchangeRate = rate.rate;
           row.append($("<td></td>").text(currency));

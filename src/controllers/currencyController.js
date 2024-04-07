@@ -36,18 +36,18 @@ const addCurrency = async (req, res) => {
 
   if (!(name && code && sign)) {
     res.status(400).send("Отсутствует нужное поле формы");
+    return;
   }
 
   try {
     const currency = await currencyService.addCurrency(name, code, sign);
-
-    if (currency === "Exict") {
+    res.status(201).send(currency);
+  } catch (error) {
+    if (error === 409) {
       res.status(409).send("Валюта с таким кодом уже существует");
     } else {
-      res.status(201).send(currency);
+      res.status(500).send("Ошибка: база данных недоступна");
     }
-  } catch (error) {
-    res.status(500).send("Ошибка: база данных недоступна");
   }
 };
 

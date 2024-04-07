@@ -30,14 +30,14 @@ const addCurrency = (name, code, sign) => {
     const isExict = await getOneCurrency(code);
 
     if (isExict) {
-      resolve("Exict");
+      reject(409);
     }
 
     db.run(
       `INSERT INTO Currencies (code, name, sign) VALUES ('${code}', '${name}', '${sign}')`,
-      function (err, row) {
+      function (err) {
         if (err) {
-          reject(err);
+          reject(500);
         }
 
         resolve({
@@ -53,15 +53,39 @@ const addCurrency = (name, code, sign) => {
 
 const getAllExchangeRates = () => {
   return new Promise((resolve, reject) => {
-    db.all("SELECT * from ExchangeRates", (err, row) => {
-      if (err) {
-        reject(err);
+    db.all(
+      "SELECT er.id, c1.id as baseID, c1.code as baseCode, c1.name as baseName, c1.sign as baseSign, c2.id as targetID, c2.code as targetCode, c2.name as targetName, c2.sign as targetSign, er.rate FROM ExchangeRates er LEFT JOIN Currencies c1 ON er.baseCurrency = c1.id LEFT JOIN Currencies c2 ON er.targetCurrency = c2.id",
+      (err, row) => {
+        if (err) {
+          reject(err);
+        }
+        if (!row) {
+          resolve(null);
+        }
+
+        const formattedArray = row.map((el) => {
+          const fomattedObj = {
+            id: el.id,
+            baseCurrency: {
+              id: el.baseID,
+              name: el.baseName,
+              code: el.baseCode,
+              sign: el.baseSign,
+            },
+            targetCurrency: {
+              id: el.targetID,
+              name: el.targetName,
+              code: el.targetCode,
+              sign: el.targetSign,
+            },
+            rate: el.rate,
+          };
+          return fomattedObj;
+        });
+
+        resolve(formattedArray);
       }
-      if (!row) {
-        resolve(null);
-      }
-      resolve(row);
-    });
+    );
   });
 };
 
