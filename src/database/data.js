@@ -8,39 +8,39 @@ async function startDatabase() {
     db.run("DROP TABLE IF EXISTS ExchangeRates");
 
     db.run(
-      "CREATE TABLE IF NOT EXISTS Currencies (id INTEGER PRIMARY KEY, Code VARCHAR,  FullName VARCHAR, Sign VARCHAR)"
+      "CREATE TABLE IF NOT EXISTS Currencies (id INTEGER PRIMARY KEY, code VARCHAR,  name VARCHAR, sign VARCHAR)"
     );
 
     db.run(
-      "CREATE TABLE IF NOT EXISTS ExchangeRates (id INTEGER PRIMARY KEY, BaseCurrencyId int,  TargetCurrencyId int, Rate Decimal(6))"
+      "CREATE TABLE IF NOT EXISTS ExchangeRates (id INTEGER PRIMARY KEY, BaseCurrencyId int,  TargetCurrencyId int, rate Decimal(6))"
     );
 
     db.run(
-      "INSERT INTO Currencies (Code, FullName, Sign) VALUES ('AUD', 'Australian dollar', 'A$')"
+      "INSERT INTO Currencies (code, name, sign) VALUES ('AUD', 'Australian dollar', 'A$')"
     );
 
     db.run(
-      "INSERT INTO Currencies (Code, FullName, Sign) VALUES ('RUB', 'Russian Ruble', '₽')"
+      "INSERT INTO Currencies (code, name, sign) VALUES ('RUB', 'Russian Ruble', '₽')"
     );
 
     db.run(
-      "INSERT INTO Currencies (Code, FullName, Sign) VALUES ('USD', 'US Dollar', '$')"
+      "INSERT INTO Currencies (code, name, sign) VALUES ('USD', 'US Dollar', '$')"
     );
 
     db.run(
-      "INSERT INTO Currencies (Code, FullName, Sign) VALUES ('EUR', 'Euro', '€')"
+      "INSERT INTO Currencies (code, name, sign) VALUES ('EUR', 'Euro', '€')"
     );
 
     db.run(
-      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES ('3', '1', '1.53')"
+      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, rate) VALUES ('3', '1', '1.53')"
     );
 
     db.run(
-      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES ('3', '2', '92.61')"
+      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, rate) VALUES ('3', '2', '92.61')"
     );
 
     db.run(
-      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES ('3', '4', '0.924113')"
+      "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, rate) VALUES ('3', '4', '0.924113')"
     );
 
     // db.all("SELECT * from ExchangeRates", (error, row) => {

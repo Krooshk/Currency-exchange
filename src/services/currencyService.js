@@ -13,7 +13,7 @@ const getAllCurrencies = () => {
 
 const getOneCurrency = (code) => {
   return new Promise((resolve, reject) => {
-    db.get(`SELECT * from Currencies WHERE Code = '${code}'`, (err, row) => {
+    db.get(`SELECT * from Currencies WHERE code = '${code}'`, (err, row) => {
       if (err) {
         reject(err);
       }
@@ -34,7 +34,7 @@ const addCurrency = (name, code, sign) => {
     }
 
     db.run(
-      `INSERT INTO Currencies (Code, FullName, Sign) VALUES ('${code}', '${name}', '${sign}')`,
+      `INSERT INTO Currencies (code, name, sign) VALUES ('${code}', '${name}', '${sign}')`,
       function (err, row) {
         if (err) {
           reject(err);
@@ -70,8 +70,8 @@ const getOneExchangeRate = (name) => {
   return new Promise((resolve, reject) => {
     db.get(
       `SELECT * from ExchangeRates  
-       WHERE BaseCurrencyId = (SELECT id from Currencies WHERE Code = '${base}')
-       AND TargetCurrencyId = (SELECT id from Currencies WHERE Code = '${target}')
+       WHERE BaseCurrencyId = (SELECT id from Currencies WHERE code = '${base}')
+       AND TargetCurrencyId = (SELECT id from Currencies WHERE code = '${target}')
        `,
       (err, row) => {
         if (err) {
@@ -125,11 +125,11 @@ const updateExchangeRate = (req, name) => {
   return new Promise((resolve, reject) => {
     db.get(
       `UPDATE ExchangeRates SET (BaseCurrencyId, TargetCurrencyId, Rate) =
-       ((SELECT id from Currencies where Code = '${base}'),
-       (SELECT id from Currencies where Code = '${target}'),
+       ((SELECT id from Currencies where code = '${base}'),
+       (SELECT id from Currencies where code = '${target}'),
        '${rate}' )
-       WHERE BaseCurrencyId = (SELECT id from Currencies WHERE Code = '${base}')
-       AND TargetCurrencyId = (SELECT id from Currencies WHERE Code = '${target}')`,
+       WHERE BaseCurrencyId = (SELECT id from Currencies WHERE code = '${base}')
+       AND TargetCurrencyId = (SELECT id from Currencies WHERE code = '${target}')`,
       (err, row) => {
         if (err) {
           reject(err);
